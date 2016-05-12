@@ -9,13 +9,12 @@ float camx = 0;
 float camy = height/2;
 float x = -338;
 float y = height/2 + 210;
-PVector friskp = new PVector(-338, height/2 + 210, 0);
-PVector dest = new PVector();
+float destx, desty;
 float lcambound, rcambound, ucambound, dcambound;
 float lbound, rbound, ubound, dbound;
 float xsize = 28;
 float ysize = 62;
-String room, state, bstate;
+String room, state, bstate, bbstate;
 boolean[] keys = new boolean[5];
 boolean freeze, playsong;
 String text1 = "Come in, have a seat.";
@@ -151,6 +150,8 @@ void draw() {
       }
     }
     if (y == 182 && x <= -539 && x >= -626 && story == 2 && key == 'z') {
+      destx = x;
+      desty = y;
       state = "battle";
     }
   }
@@ -320,6 +321,8 @@ void draw() {
   if (state == "battle") {
     xsize = 28.5;
     ysize = 46.5;
+    x = lerp(x, destx, .15);
+    y = lerp(y, desty, .15);
     frisknum = 1;
     if (story == 2) {
       fill(0);
@@ -330,8 +333,8 @@ void draw() {
       rect(camx, camy+50, 525, 150);
       fill(255);
       if (bstate == "main") {
-        x = lerp(x, mouseX, 0.1);
-        y = lerp(y, mouseY, 0.1);
+        destx = camx - 52;
+        desty = 362;
         imageMode(CENTER);
         image(act[0], camx, camy+200);
         imageMode(CORNER);
@@ -343,9 +346,10 @@ void draw() {
   image(frisk[frisknum], 0, 0, xsize, ysize);
   popMatrix();
   textSize(20);
-  text(friskp.mag(), x, y-20);
   text(mouseY, x, y-5);
   text(y, x, y-35);
+  text(x, x, y-20);
+  text(destx, x, y- 50);
   if (state == "talk") {
     fill(0);
     stroke(255);
