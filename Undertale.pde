@@ -1,3 +1,4 @@
+import processing.sound.*;
 PImage[] frisk = new PImage[2];
 PImage hall, blue, r1;
 PImage[] act = new PImage[1];
@@ -15,10 +16,14 @@ float lbound, rbound, ubound, dbound;
 float xsize = 28;
 float ysize = 62;
 String room, state, bstate;
-boolean[] keys = new boolean[4];
-boolean freeze;
+boolean[] keys = new boolean[5];
+boolean freeze, playsong;
 String text1 = "Come in, have a seat.";
+SoundFile sans, home;
 void setup() {
+  playsong = true;
+  sans = new SoundFile(this, "sans.wav");
+  home = new SoundFile(this, "home.mp3");
   r1 = loadImage("r1.png");
   font = loadFont("DeterminationMono-48.vlw"); 
   textFont(font, 20);
@@ -29,6 +34,7 @@ void setup() {
   keys[1] = false;
   keys[2] = false;
   keys[3] = false;
+  keys[4] = false;
   size(640, 480, P3D);
   frisk[0] = loadImage("sl.png");
   frisk[1] = loadImage("btl.png");
@@ -51,6 +57,9 @@ void keyPressed() {
   }
   if (keyCode == RIGHT) {
     keys[3] = true;
+  }
+  if (key == 'z' || key == 'Z') {
+    keys[4] = true;
   }
 }
 
@@ -83,11 +92,21 @@ void keyReleased() {
       walktimer = -1;
     }
   }
+  if (key == 'z' || key == 'Z') {
+    keys[4] = false;
+  }
 }
 
 void draw() {
   background(0);
   if (room == "r1" && state == "walk" || room == "r1" && state == "talk") {
+    if (playsong == true) {
+      home.play();
+      playsong = false;
+    }
+    if (home.duration() == 15) {
+      playsong = true;
+    }
     image(r1, -907, -55, 330*2, 250*2);
     ubound = 59;
     dbound = 314;
@@ -303,8 +322,6 @@ void draw() {
     ysize = 46.5;
     frisknum = 1;
     if (story == 2) {
-      dest.x = 275;
-      dest.y = 430;
       fill(0);
       stroke(255);
       strokeWeight(7);
@@ -313,6 +330,8 @@ void draw() {
       rect(camx, camy+50, 525, 150);
       fill(255);
       if (bstate == "main") {
+        x = lerp(x, mouseX, 0.1);
+        y = lerp(y, mouseY, 0.1);
         imageMode(CENTER);
         image(act[0], camx, camy+200);
         imageMode(CORNER);
@@ -340,10 +359,12 @@ void draw() {
       fill(255);
       if (counter < text1.length()*3) {
         counter++;
+        sans.amp(0.25);
+        sans.play();
       }
       text(text1.substring(0, counter/3), camx -180, camy + 115, 300, 75);
       if (counter/3 == 21) {
-        if (key == 'z' || key == 'Z') {
+        if (keys[4]) {
           state = "walk";
           story = 2;
           counter = 0;
