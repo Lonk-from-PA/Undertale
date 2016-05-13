@@ -4,7 +4,7 @@ PImage hall, blue, r1;
 PImage[] acticon = new PImage[1];
 PFont font;
 int walktimer = 0;
-int story, counter, frisknum, songtimer;
+int story, counter, frisknum, songtimer, actstate, wait;
 float camx = 0;
 float camy = height/2;
 float x = -338;
@@ -19,7 +19,7 @@ String text1 = "Come in, have a seat.";
 String[] acts = new String[4];
 String[] btltext = new String[20];
 boolean[] keys = new boolean[5];
-boolean load, playsong;
+boolean playsong;
 SoundFile sans, therapy;
 void setup() {
   songtimer = 0;
@@ -153,7 +153,7 @@ void draw() {
         x += 3;
       }
     }
-    if (y == 182 && x <= -539 && x >= -626 && story == 2 && key == 'z') {
+    if (y == 182 && x <= -539 && x >= -626 && story == 2 && keys[1]) {
       destx = x;
       desty = y;
       therapy.stop();
@@ -326,25 +326,10 @@ void draw() {
   if (state == "battle") {
     xsize = 28.5;
     ysize = 46.5;
-    if (keys[4] == true) {
-      state = "walk";
-    }
-    if (keys[0]) {
-      y -=1;
-    }
-    if (keys[1]) {
-      y +=1;
-    }
-    if (keys[2]) {
-      x -=1;
-    }
-    if (keys[3]) {
-      x +=1;
-    }
     frisknum = 1;
     if (story == 2) {
-      x = lerp(x, destx, .15);
-      y = lerp(y, desty, .15);
+      x = lerp(x, destx, .2);
+      y = lerp(y, desty, .2);
       acts[0] = "Lie";
       acts[1] = "Explain";
       acts[2] = "Don't talk";
@@ -366,6 +351,70 @@ void draw() {
         } else {
           acticon[0] = loadImage("actnots.png");
         }
+        if (keys[4]) {
+          bstate = "act";
+        }
+      }
+      if (bstate == "act") {
+        if (wait < 10) {
+          wait += 1;
+        }
+        textSize(30);
+        if (actstate == 0) {
+          fill(255, 255, 0);
+          destx = camx - 240;
+          desty = camy - 10;
+        } else {
+          fill(255);
+        }
+        text(acts[0], camx - 200, camy + 25);
+        if (actstate == 1) {
+          fill(255, 255, 0);
+          destx = camx - 20;
+          desty = camy - 10;
+        } else {
+          fill(255);
+        }
+        text(acts[1], camx + 20, camy +25);
+        if (actstate == 2) {
+          fill(255, 255, 0);
+          destx = camx - 240;
+          desty = camy + 55;
+        } else {
+          fill(255);
+        }
+        text(acts[2], camx - 200, camy + 90);
+        if (keyCode == RIGHT && actstate == 0) {
+          actstate = 1;
+        }
+        if (keyCode == DOWN && actstate == 0) {
+          actstate = 2;
+        }
+        if (keyCode == LEFT && actstate == 1) {
+          actstate = 0;
+        }
+        if (keyCode == DOWN && actstate == 1) {
+          actstate = 2;
+        }
+        if (keyCode == UP && actstate == 2) {
+          actstate = 0;
+        }
+        if (keys[4] && actstate == 0 && wait == 10) {
+          bstate = "talk";
+          btltext[0] = "You say that you've been controlling your anger easily.";
+        }
+      }
+      if (bstate == "talk") {
+        x = 1000;
+        y = 1000;
+        textSize(30);
+        if (counter < btltext[0].length()*2) {
+          counter++;
+          sans.play();
+        }
+        rectMode(CORNER);
+        text(btltext[0].substring(0, counter/2), camx -180, camy, 400, 200);
+        rectMode(CENTER);
       }
     }
   }
@@ -374,10 +423,7 @@ void draw() {
   image(frisk[frisknum], 0, 0, xsize, ysize);
   popMatrix();
   textSize(20);
-  text(mouseY, x, y-5);
-  text(y, x, y-35);
-  text(x, x, y-20);
-  text(destx, x, y- 50);
+  fill(255);
   if (state == "talk") {
     fill(0);
     stroke(255);
