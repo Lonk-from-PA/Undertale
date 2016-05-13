@@ -1,28 +1,31 @@
 import processing.sound.*;
 PImage[] frisk = new PImage[2];
 PImage hall, blue, r1;
-PImage[] act = new PImage[1];
+PImage[] acticon = new PImage[1];
 PFont font;
 int walktimer = 0;
-int story, counter, frisknum;
+int story, counter, frisknum, songtimer;
 float camx = 0;
 float camy = height/2;
 float x = -338;
 float y = height/2 + 210;
-float destx, desty;
+float destx, desty, songtime;
 float lcambound, rcambound, ucambound, dcambound;
 float lbound, rbound, ubound, dbound;
 float xsize = 28;
 float ysize = 62;
 String room, state, bstate, bbstate;
-boolean[] keys = new boolean[5];
-boolean freeze, playsong;
 String text1 = "Come in, have a seat.";
-SoundFile sans, home;
+String[] acts = new String[4];
+String[] btltext = new String[20];
+boolean[] keys = new boolean[5];
+boolean load, playsong;
+SoundFile sans, therapy;
 void setup() {
+  songtimer = 0;
   playsong = true;
   sans = new SoundFile(this, "sans.wav");
-  home = new SoundFile(this, "home.mp3");
+  therapy = new SoundFile(this, "therapy.mp3");
   r1 = loadImage("r1.png");
   font = loadFont("DeterminationMono-48.vlw"); 
   textFont(font, 20);
@@ -37,7 +40,7 @@ void setup() {
   size(640, 480, P3D);
   frisk[0] = loadImage("sl.png");
   frisk[1] = loadImage("btl.png");
-  act[0] = loadImage("actnots.png");
+  acticon[0] = loadImage("actnots.png");
   room = "r1";
   state = "talk";
   bstate = "main";
@@ -99,12 +102,12 @@ void keyReleased() {
 void draw() {
   background(0);
   if (room == "r1" && state == "walk" || room == "r1" && state == "talk") {
-    if (playsong == true) {
-      home.play();
-      playsong = false;
+    if (songtimer == 0) {
+      therapy.play();
     }
-    if (home.duration() == 15) {
-      playsong = true;
+    songtimer += 1;
+    if (songtimer >= 3360) {
+      songtimer = 0;
     }
     image(r1, -907, -55, 330*2, 250*2);
     ubound = 59;
@@ -116,6 +119,7 @@ void draw() {
     lcambound = -587;
     dcambound = 185;
     if (x >= -347 && y <= 296 && y >= 194 && keys[3] && state == "walk" && story > 3) {
+      songtimer = 0;
       room = "hall";
     }
     if (x >= -44 && y <= 452 && y >=374) {
@@ -152,6 +156,7 @@ void draw() {
     if (y == 182 && x <= -539 && x >= -626 && story == 2 && key == 'z') {
       destx = x;
       desty = y;
+      therapy.stop();
       state = "battle";
     }
   }
@@ -321,10 +326,28 @@ void draw() {
   if (state == "battle") {
     xsize = 28.5;
     ysize = 46.5;
-    x = lerp(x, destx, .15);
-    y = lerp(y, desty, .15);
+    if (keys[4] == true) {
+      state = "walk";
+    }
+    if (keys[0]) {
+      y -=1;
+    }
+    if (keys[1]) {
+      y +=1;
+    }
+    if (keys[2]) {
+      x -=1;
+    }
+    if (keys[3]) {
+      x +=1;
+    }
     frisknum = 1;
     if (story == 2) {
+      x = lerp(x, destx, .15);
+      y = lerp(y, desty, .15);
+      acts[0] = "Lie";
+      acts[1] = "Explain";
+      acts[2] = "Don't talk";
       fill(0);
       stroke(255);
       strokeWeight(7);
@@ -336,8 +359,13 @@ void draw() {
         destx = camx - 52;
         desty = 362;
         imageMode(CENTER);
-        image(act[0], camx, camy+200);
+        image(acticon[0], camx, camy+200);
         imageMode(CORNER);
+        if (y >= 355) {
+          acticon[0] = loadImage("acts.png");
+        } else {
+          acticon[0] = loadImage("actnots.png");
+        }
       }
     }
   }
