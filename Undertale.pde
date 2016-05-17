@@ -122,7 +122,7 @@ void draw() {
   background(0);
   if (room == "r1" && state == "walk" || room == "r1" && state == "talk") {
     if (songtimer == 0) {
-      therapy.play();
+      therapy.play(1, .015);
     }
     songtimer += 1;
     if (songtimer >= 3360) {
@@ -140,7 +140,7 @@ void draw() {
     if (x >= -347 && y <= 296 && y >= 194 && keys[3] && state == "walk" && story >= 3) {
       songtimer = 0;
       therapy.stop();
-      room = "hall";
+      state = "drive";
     }
     if (keys[0] && state == "walk") {
       if (y <= ubound || y <= 272 && y >= 185 && x <= -488 && x >= -692 || y <= 128 && x >= -635 && x <= -539) {
@@ -180,7 +180,7 @@ void draw() {
   }
   if (room == "hall" && state == "walk" || room == "hall" && state == "talk") {
     if (songtimer == 0) {
-      home.play();
+      home.play(1, .015);
     }
     songtimer += 1;
     if (songtimer >= (123*60) - 10) {
@@ -229,7 +229,7 @@ void draw() {
   }
   if (room == "blue" && state == "walk" || room == "blue" && state == "talk" || room == "blue" && state == "battle") {
     if (songtimer == 0) {
-      home.play();
+      home.play(1, .015);
     }
     songtimer += 1;
     if (songtimer >= 123*60) {
@@ -395,7 +395,7 @@ void draw() {
     rectMode(CORNER);
     if (story == 2) {
       if (songtimer == 0) {
-        btl1song.play();
+        btl1song.play(1, .015);
       }
       songtimer += 1;
       if (songtimer >= 3360) {
@@ -469,7 +469,7 @@ void draw() {
         textSize(30);
         if (counter < btltext[0].length()*2) {
           counter++;
-          sanssound.play();
+          sanssound.play(1, .015);
         }
         text(btltext[0].substring(0, counter/2), camx -180, camy, 400, 200);
         if (y >= 355) {
@@ -622,16 +622,13 @@ void draw() {
         textSize(30);
         if (counter < btltext[0].length()*2) {
           counter++;
-          sanssound.play();
+          sanssound.play(1, .015);
         }
         rectMode(CORNER);
         text(btltext[0].substring(0, counter/2), camx -180, camy, 400, 200);
         rectMode(CENTER);
         if (counter == btltext[0].length()*2 && keys[4]) {
           if (bstory == 3) {
-            imageMode(CORNER);
-            rectMode(CORNER);
-            textMode(CORNER);
             counter = 0;
             btl1song.stop();
             songtimer = 0;
@@ -680,8 +677,7 @@ void draw() {
       fill(255);
       if (counter < text1.length()*3) {
         counter++;
-        sanssound.amp(0.25);
-        sanssound.play();
+        sanssound.play(1, .015);
       }
       text(text1.substring(0, counter/3), camx -180, camy + 115, 300, 75);
       if (counter/3 == 21) {
@@ -690,6 +686,20 @@ void draw() {
           story = 2;
           counter = 0;
         }
+      }
+    }
+  }
+  if (state == "drive") {
+    background(0);
+    if (drivetimer == 0) {
+      car.play(1, .015);
+    }
+    drivetimer += 1;
+    if (drivetimer == (60*5) + 20) {
+      car.stop();
+      if (x >= -347 && y <= 296 && y >= 194) {
+        room = "hall";
+        state = "walk";
       }
     }
   }
