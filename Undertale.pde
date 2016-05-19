@@ -1,30 +1,32 @@
 import processing.sound.*;
 PImage[] frisk = new PImage[2];
-PImage hall, blue, r1, bedroom, sanshead, sansbody;
-PImage[] acticon = new PImage[1];
+PImage hall, blue, r1, bedroom, sanshead, sansbody, papyrus, fist;
+PImage[] acticon = new PImage[2];
 PFont font;
 int walktimer = 0;
 int story, counter, frisknum, songtimer, actstate, wait, bstory;
-int liecount, explaincount, silencecount, drivetimer, textnum;
+int liecount, explaincount, silencecount, drivetimer, textnum, fighttimer;
 float camx = 0;
 float camy = height/2;
 float x = -338;
 float y = height/2 + 210;
+float papsize = 2;
 float destx, desty, songtime;
 float lcambound, rcambound, ucambound, dcambound;
 float lbound, rbound, ubound, dbound;
 float xsize = 38;
 float ysize = 62;
 float sansx = -2.5;
-float sansy;
-String room, state, bstate, bbstate, sansmovex, sansmovey, evilstate;
+float sansy, fistx, fisty;
+String room, state, bstate, bbstate, sansmovex, sansmovey, evilstate, mainstate;
 String text1 = "Come in, have a seat.";
 String[] text = new String[20];
 String[] acts = new String[4];
 String[] btltext = new String[20];
 boolean[] keys = new boolean[6];
 boolean bybed = false;
-SoundFile sanssound, therapy, btl1song, car, home, sleep;
+boolean mean;
+SoundFile sanssound, therapy, btl1song, car, home, sleep, attack;
 void setup() {
   songtimer = 0;
   textnum = 0;
@@ -34,6 +36,7 @@ void setup() {
   car = new SoundFile(this, "Car Engine Sound Effect.mp3");
   home = new SoundFile(this, "Undertale OST_ 012 - Home.mp3");
   sleep = new SoundFile(this, "Undertale OST_ 101 - Good Night.mp3");
+  attack = new SoundFile(this, "attack.mp3");
   font = loadFont("DeterminationMono-48.vlw"); 
   textFont(font, 20);
   background(0);
@@ -47,15 +50,19 @@ void setup() {
   frisk[0] = loadImage("sl.png");
   frisk[1] = loadImage("btl.png");
   acticon[0] = loadImage("actnots.png");
+  acticon[1] = loadImage("fights.png");
   hall = loadImage("hall.png");
   blue = loadImage("blue.png");
   r1 = loadImage("r1.png");
   bedroom = loadImage("bedroom.png");
   sanshead = loadImage("sanshead.png");
   sansbody = loadImage("sansbody.png");
+  papyrus = loadImage("papyrus.png");
+  fist = loadImage("fist1.png");
   room = "r1";
   state = "talk";
   bstate = "main";
+  mainstate = "fights";
   story = 1;
 }
 
@@ -116,7 +123,7 @@ void keyReleased() {
     keys[5] = false;
   }
   if (key == '3') {
-    story = 3;
+    story += 1;
   }
   if (key == '1') {
     room = "blue";
@@ -201,13 +208,15 @@ void draw() {
     ubound = 29;
     lbound = 771;
     rbound = 1024;
-    wait += 1;
+    if (wait < 10) {
+      wait += 1;
+    }
     if (x >= 961 && y <= 77 || x >= 959 && y <= 80) {
       if (keys[4] && state == "walk" && story == 5 && wait >= 10) {
         songtimer = 0;
         state = "sleep";
       }
-      if (keys[4] && state == "walk" && story < 5 && wait >= 10) {
+      if (keys[4] && state == "walk" && story < 5 && wait >= 10 || keys[4] && state == "walk" && story == 6 && wait >= 10) {
         counter = 0;
         bybed = true;
         state = "talk";
@@ -267,6 +276,10 @@ void draw() {
     rbound = 1090;
     ubound = 220;
     dbound = 300;
+    if (x <= -320 && story == 6) {
+      drivetimer = 0;
+      state = "drive";
+    }
     if (x >= 394 && x <= 448 && y <= 220 && keys[0] && state == "walk") {
       room = "blue";
     }
@@ -307,6 +320,9 @@ void draw() {
       home.play(1, .015);
     }
     songtimer += 1;
+    if (wait < 10) {
+      wait += 1;
+    }
     if (songtimer >= 123*60) {
       songtimer = 0;
     }
@@ -319,6 +335,14 @@ void draw() {
     rcambound = 500;
     ucambound = 59;
     dcambound = 59;
+    if (x <= 393 && y <=164 && keys[4] && wait >= 10 && state == "walk") {
+      bybed = true;
+      state = "talk";
+    }
+    if (x <= 564 && x >= 462 && y <=-31 && keys[4] && wait >= 10 && state == "walk") {
+      bybed = false;
+      state = "talk";
+    }
     if (y >= 190 && x >= 406 && x <= 440 && keys[1] && state == "walk") {
       room = "hall";
     }
@@ -477,7 +501,7 @@ void draw() {
     strokeWeight(7);
     strokeCap(PROJECT);
     rectMode(CENTER);
-    rect(camx, camy+50, 525, 150);
+    rect(camx, camy+70, 525, 150);
     fill(255);
     rectMode(CORNER);
     if (story == 2) {
@@ -558,8 +582,8 @@ void draw() {
           counter++;
           sanssound.play(1, .015);
         }
-        text(btltext[0].substring(0, counter/2), camx -180, camy, 400, 200);
-        if (y >= 355) {
+        text(btltext[0].substring(0, counter/2), camx -180, camy + 20, 420, 200);
+        if (y >= 170) {
           acticon[0] = loadImage("acts.png");
         } else {
           acticon[0] = loadImage("actnots.png");
@@ -577,27 +601,27 @@ void draw() {
         if (actstate == 0) {
           fill(255, 255, 0);
           destx = camx - 240;
-          desty = camy - 10;
+          desty = camy + 10;
         } else {
           fill(255);
         }
-        text(acts[0], camx - 200, camy + 25);
+        text(acts[0], camx - 200, camy + 45);
         if (actstate == 1) {
           fill(255, 255, 0);
           destx = camx - 20;
-          desty = camy - 10;
+          desty = camy + 10;
         } else {
           fill(255);
         }
-        text(acts[1], camx + 20, camy +25);
+        text(acts[1], camx + 20, camy + 45);
         if (actstate == 2) {
           fill(255, 255, 0);
           destx = camx - 240;
-          desty = camy + 55;
+          desty = camy + 75;
         } else {
           fill(255);
         }
-        text(acts[2], camx - 200, camy + 90);
+        text(acts[2], camx - 200, camy + 110);
         if (keyCode == RIGHT && actstate == 0) {
           actstate = 1;
         }
@@ -712,7 +736,7 @@ void draw() {
           sanssound.play(1, .015);
         }
         rectMode(CORNER);
-        text(btltext[0].substring(0, counter/2), camx -180, camy, 400, 200);
+        text(btltext[0].substring(0, counter/2), camx -180, camy + 20, 400, 200);
         rectMode(CENTER);
         if (counter == btltext[0].length()*2 && keys[4]) {
           if (bstory == 3) {
@@ -735,6 +759,326 @@ void draw() {
             bstory = 2;
           }
           if (bstory == 0) {
+            bstory = 1;
+          }
+          counter = 0;
+          bstate = "main";
+        }
+      }
+    }
+    if (story == 6) {
+      if (songtimer == 0) {
+        btl1song.play(1, .015);
+      }
+      songtimer += 1;
+      if (songtimer >= 3360) {
+        songtimer = 0;
+      }
+      imageMode(CENTER);
+      pushMatrix();
+      translate(camx, camy - 170);
+      image(papyrus, 0, 45, 74*papsize, 103*papsize);
+      popMatrix();
+      imageMode(CORNER);
+      if (bstory == 0) {
+        acts[0] = "Smile";
+        acts[1] = "Confront";
+        acts[2] = "Run away";
+        acts[3] = "Scowl";
+      } else  if (bstory < 3) {
+        acts[0] = "Mock him";
+        acts[1] = "Stay silent";
+        acts[2] = "Run away";
+        acts[3] = "";
+      } else {
+        acts[0] = "Run away";
+        acts[1] = "Run away";
+        acts[2] = "Run away";
+        acts[3] = "Run away";
+      }
+      if (bstate == "main") {
+        if (wait < 10) {
+          wait += 1;
+        }
+        if (bstory == 0) {
+          btltext[0] = "You arrive at school and Marcus spots you.";
+        }
+        if (bstory >= 1 && silencecount == 1) {
+          btltext[0] = "He easily catches up to you.";
+          x = 7000;
+          if (keys[4] && wait >= 10) {
+            counter = 0;
+            wait = 0;
+            silencecount = 0;
+          }
+        }
+        if (bstory == 1 && silencecount == 0) {
+          btltext[0] = "Marcus starts mocking you.";
+        }
+        if (bstory == 2 && silencecount == 0) {
+          btltext[0] = "People start crowding the two of you.";
+        }
+        if (bstory == 3 && silencecount == 0) {
+          if (mean == true) {
+            btltext[0] = "Marcus scowls and turns away.";
+          } else {
+            btltext[0] = "Marcus looks over at his friend.";
+          }
+        }
+        imageMode(CENTER);
+        if (silencecount != 1) {
+          image(acticon[0], camx + 122, camy + 200);
+          image(acticon[1], camx - 122, camy + 200);
+        }
+        imageMode(CORNER);
+        textSize(30);
+        if (counter < btltext[0].length()*2) {
+          counter++;
+          sanssound.play(1, .015);
+        }
+        text(btltext[0].substring(0, counter/2), camx -180, camy + 20, 400, 200);
+        if (keys[3] && mainstate == "fights") {
+          mainstate = "acts";
+        }
+        if (keys[2] && mainstate == "acts") {
+          mainstate = "fights";
+        }
+        if (mainstate == "acts") {
+          acticon[0] = loadImage("acts.png");
+          acticon[1] = loadImage("fightnots.png");
+          destx = camx + 70;
+          desty = camy + 178;
+        }
+        if (mainstate == "fights") {
+          acticon[0] = loadImage("actnots.png");
+          acticon[1] = loadImage("fights.png");
+          destx = camx - 175;
+          desty = camy + 178;
+        }
+        if (keys[4] && wait == 10 && mainstate == "acts" && silencecount != 1) {
+          wait = 0;
+          bstate = "act";
+        }
+        if (keys[4] && wait == 10 && mainstate == "fights" && silencecount != 1) {
+          wait = 0;
+          fighttimer = 0;
+          bstate = "fight";
+        }
+      }
+      if (bstate == "fight") {
+        if (fighttimer == 0) {
+          fistx = random(camx - 40, camx + 40);
+          fisty = random(camy - 200, camy - 100);
+          attack.play(1, .2);
+        }
+        fighttimer += 1;
+        if (fighttimer <= 15) {
+          fist = loadImage("fist1.png");
+        } else {
+          fist = loadImage("fist2.png");
+        }
+        imageMode(CENTER);
+        if (fighttimer <=25) {
+          image(fist, fistx, fisty);
+        }
+        if (fighttimer <= 30) {
+          papyrus = loadImage("papyrus1.png");
+        } else {
+          papyrus = loadImage("papyrus.png");
+          papsize = 2;
+        }
+        imageMode(CORNER);
+        if (fighttimer == 60) {
+          counter = 0;
+          bstate = "main";
+          if (bstory == 3) {
+            btl1song.stop();
+            counter = 0;
+            wait = 0;
+            story = 7;
+            state = "drive";
+          }
+          if (bstory < 3) {
+            bstory += 1;
+          }
+          if (bstory == 2) {
+           mean = true; 
+          }
+        }
+        x = 7000;
+      }
+      if (bstate == "act") {
+        if (wait < 10) {
+          wait += 1;
+        }
+        textSize(30);
+        if (actstate == 0) {
+          fill(255, 255, 0);
+          destx = camx - 240;
+          desty = camy + 10;
+        } else {
+          fill(255);
+        }
+        text(acts[0], camx - 200, camy + 45);
+        if (actstate == 1) {
+          fill(255, 255, 0);
+          destx = camx - 20;
+          desty = camy + 10;
+        } else {
+          fill(255);
+        }
+        text(acts[1], camx + 20, camy +45);
+        if (actstate == 2) {
+          fill(255, 255, 0);
+          destx = camx - 240;
+          desty = camy + 75;
+        } else {
+          fill(255);
+        }
+        text(acts[2], camx - 200, camy + 110);
+        if (actstate == 3) {
+          fill(255, 255, 0);
+          destx = camx - 20;
+          desty = camy + 75;
+        } else {
+          fill(255);
+        }
+        text(acts[3], camx + 20, camy + 110);
+        fill(255);
+        if (keyCode == RIGHT && actstate == 0) {
+          actstate = 1;
+        }
+        if (keyCode == DOWN && actstate == 0) {
+          actstate = 2;
+        }
+        if (keyCode == LEFT && actstate == 1) {
+          actstate = 0;
+        }
+        if (keyCode == DOWN && actstate == 1 && bstory != 1 && bstory != 2) {
+          actstate = 3;
+        }
+        if (keyCode == UP && actstate == 2) {
+          actstate = 0;
+        }
+        if (keyCode == RIGHT && actstate == 2 && bstory != 1 && bstory != 2) {
+          actstate = 3;
+        }
+        if (keyCode == UP && actstate == 3) {
+          actstate = 1;
+        }
+        if (keyCode == LEFT && actstate == 3) {
+          actstate = 2;
+        }
+        if (keys[4] && actstate == 0 && wait == 10 && bstory == 0) {
+          btltext[0] = "You smile at Marcus hoping he won't come up to you.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 0 && wait == 10 && bstory == 1) {
+          btltext[0] = "You start to make fun of random things about him.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 0 && wait == 10 && bstory == 2) {
+          btltext[0] = "You make fun of what he's wearing at the moment.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 1 && wait == 10 && bstory == 0) {
+          btltext[0] = "You walk towards him angrily.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 1 && wait == 10 && bstory == 1) {
+          btltext[0] = "You cower towards the lockers.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 1 && wait == 10 && bstory == 2) {
+          btltext[0] = "You hang your head down.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 2 && wait == 10 && bstory == 0) {
+          btltext[0] = "You start running in the opposite direction.";
+          counter = 0;
+          wait = 0;
+          silencecount += 1;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 2 && wait == 10 && bstory == 1) {
+          btltext[0] = "You start running in the opposite direction.";
+          counter = 0;
+          wait = 0;
+          silencecount += 1;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 2 && wait == 10 && bstory == 2) {
+          btltext[0] = "You start running in the opposite direction.";
+          counter = 0;
+          wait = 0;
+          silencecount += 1;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 3 && wait == 10 && bstory == 0) {
+          btltext[0] = "You make an angry face at Marcus.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && wait == 10 && bstory == 3) {
+          btltext[0] = "You make a run for it.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[5] && wait == 10) {
+          counter = 0;
+          wait = 0;
+          bstate = "main";
+        }
+      }
+      if (bstate == "talk") {
+        x = 1000;
+        y = 1000;
+        textSize(30);
+        if (counter < btltext[0].length()*2) {
+          counter++;
+          sanssound.play(1, .015);
+        }
+        rectMode(CORNER);
+        text(btltext[0].substring(0, counter/2), camx -180, camy + 20, 400, 200);
+        rectMode(CENTER);
+        if (counter == btltext[0].length()*2 && keys[4]) {
+          if (bstory == 3) {
+            counter = 0;
+            btl1song.stop();
+            songtimer = 0;
+            x = camx;
+            y = camy - 10;
+            frisknum = 0;
+            xsize = 38;
+            ysize = 62;
+            frisk[0] = loadImage("su.png");
+            state = "drive";
+            story = 7;
+          }
+          if (bstory == 2) {
+            wait = 0;
+            bstory = 3;
+          }
+          if (bstory == 1) {
+            wait = 0;
+            bstory = 2;
+          }
+          if (bstory == 0) {
+            wait = 0;
             bstory = 1;
           }
           counter = 0;
@@ -775,7 +1119,7 @@ void draw() {
         }
       }
     }
-    if (story == 3 && bybed == false) {
+    if (story == 3 && bybed == false && room == "bedroom") {
       fill(255);
       text1 = "You play some GTA.";
       if (counter < text1.length()*3) {
@@ -790,7 +1134,7 @@ void draw() {
         }
       }
     }
-    if (story == 3 && bybed == true) {
+    if (story == 3 && bybed == true && room == "bedroom") {
       fill(255);
       text1 = "You don't feel very tired right now.";
       if (counter < text1.length()*3) {
@@ -799,6 +1143,70 @@ void draw() {
       }
       text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
       if (counter/3 == 36) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (bybed == true && room == "blue") {
+      fill(255);
+      text1 = "Your sister would kill you if you read her diary.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == 49) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (bybed == false && room == "blue") {
+      fill(255);
+      text1 = "It's a bunch of teenage romance novels.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == 39) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 6 && bybed == true && room == "bedroom") {
+      fill(255);
+      text1 = "You can't sleep right now. You need to go to school.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == 52) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 6 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "Don't play games right now. You need to go to school.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == 53) {
         if (keys[4]) {
           wait = 0;
           counter = 0;
@@ -841,6 +1249,8 @@ void draw() {
     }
   }
   if (state == "drive") {
+    home.stop();
+    therapy.stop();
     background(0);
     if (drivetimer == 0) {
       car.play(1, .015);
@@ -848,9 +1258,19 @@ void draw() {
     drivetimer += 1;
     if (drivetimer == (60*5) + 20) {
       car.stop();
-      if (x >= -347 && y <= 296 && y >= 194) {
+      if (story == 3) {
         room = "hall";
         state = "walk";
+      }
+      if (story == 6) {
+        songtimer = 0;
+        bstory = 0;
+        state = "battle";
+      }
+      if (story == 7) {
+       songtimer = 0;
+       room = "hall";
+       state = "walk";
       }
     }
   }
