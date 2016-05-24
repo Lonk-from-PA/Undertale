@@ -2,7 +2,7 @@ import processing.sound.*;
 PImage[] frisk = new PImage[2];
 PImage hall, blue, r1, bedroom, sanshead, sansbody, papyrus, fist, kitchen, muffet;
 PImage[] acticon = new PImage[2];
-PFont font;
+PFont font, logofontback, logofontfront;
 int walktimer = 0;
 int story, counter, frisknum, songtimer, actstate, wait, bstory;
 int liecount, explaincount, silencecount, drivetimer, textnum, fighttimer;
@@ -26,7 +26,7 @@ String[] btltext = new String[20];
 boolean[] keys = new boolean[6];
 boolean bybed = false;
 boolean mean, gotyog;
-SoundFile sanssound, therapy, btl1song, car, home, sleep, attack, chill;
+SoundFile sanssound, therapy, btl1song, car, home, sleep, attack, chill, megalovania;
 void setup() {
   songtimer = 0;
   textnum = 0;
@@ -38,7 +38,10 @@ void setup() {
   sleep = new SoundFile(this, "Undertale OST_ 101 - Good Night.mp3");
   attack = new SoundFile(this, "attack.mp3");
   chill = new SoundFile(this, "Undertale OST_ 041 - Chill.mp3");
+  megalovania = new SoundFile(this, "Undertale OST_ 100 - Megalovania.mp3");
   font = loadFont("DeterminationMono-48.vlw");
+  logofontback = loadFont("MonsterFriendBack-48.vlw");
+  logofontfront = loadFont("MonsterFriendFore-48.vlw");
   textFont(font, 20);
   background(0);
   keys[0] = false;
@@ -63,10 +66,12 @@ void setup() {
   kitchen = loadImage("kitchen.png");
   muffet = loadImage("muffet.png");
   room = "r1";
-  state = "talk";
+  state = "open";
   bstate = "main";
   mainstate = "fights";
   story = 1;
+  destx = x;
+  desty = y;
 }
 
 void keyPressed() {
@@ -93,28 +98,40 @@ void keyPressed() {
 void keyReleased() {
   if (keyCode == UP) {
     keys[0] = false;
-    if (keys[1] == false && state == "walk") {
+    if (state == "walk") {
+      y = desty;
+    }
+    if (keys[1] == false && keys[2] == false && keys[3] == false && state == "walk") {
       frisk[0] = loadImage("su.png");
       walktimer = 0;
     }
   }
   if (keyCode == DOWN) {
     keys[1] = false;
-    if (keys[0] == false && state == "walk") {
+    if (state == "walk") {
+      y = desty;
+    }
+    if (keys[0] == false && keys[2] == false && keys [3] == false && state == "walk") {
       frisk[0] = loadImage("sd.png");
       walktimer = 0;
     }
   }
   if (keyCode == LEFT) {
     keys[2] = false;
-    if (keys[0] == false && state == "walk") {
+    if (state == "walk") {
+      x = destx;
+    }
+    if (keys[3] == false && state == "walk") {
       frisk[0] = loadImage("sl.png");
       walktimer = 0;
     }
   }
   if (keyCode == RIGHT) {
     keys[3] = false;
-    if (keys[0] == false && state == "walk") {
+    if (state == "walk") {
+      x = destx;
+    }
+    if (keys[2] == false && state == "walk") {
       frisk[0] = loadImage("sr.png");
       walktimer = 0;
     }
@@ -135,6 +152,36 @@ void keyReleased() {
 
 void draw() {
   background(0);
+  if (state == "open") {
+    if (songtimer == 0) {
+      megalovania.play(1, 0.1);
+    }
+    songtimer += 1;
+    if (songtimer == 9360+60) {
+      songtimer = 0;
+    }
+    if (keys[4]) {
+      megalovania.stop();
+      state = "talk";
+      songtimer = 0;
+    }
+    textSize(50);
+    if (wait == 0) {
+      fill(255);
+    }
+    if (wait >= 60) {
+      fill(0);
+    }
+    if (wait == 120) {
+      wait = -1;
+    }
+    wait += 1;
+    text("Press Z", -100, -50);
+    textSize(30);
+    fill(255);
+    text("[Z] - Confirm \n[X] - Cancel \n[Arrow Keys] - Move", -150, 10);
+    text("Nolan Manor #18 3rd Hour", -210, 200);
+  }
   if (room == "r1" && state == "walk" || room == "r1" && state == "talk") {
     if (songtimer == 0) {
       therapy.play(1, .015);
@@ -144,10 +191,10 @@ void draw() {
       songtimer = 0;
     }
     image(r1, -907, -55, 330*2, 250*2);
-    ubound = 59;
-    dbound = 314;
-    rbound = -347;
-    lbound = -860;
+    ubound = 62;
+    dbound = 311;
+    rbound = -344;
+    lbound = -857;
     ucambound = 185;
     rcambound = -587;
     lcambound = -587;
@@ -155,61 +202,77 @@ void draw() {
     if (wait < 10) {
       wait += 1;
     }
-    if (x >= -347 && y <= 296 && y >= 194 && keys[3] && state == "walk" && story == 3) {
+    if (wait > 10) {
+      wait = 0;
+    }
+    if (destx >= -347 && desty <= 296 && desty >= 194 && keys[3] && state == "walk" && story == 3) {
       songtimer = 0;
+      drivetimer = 0;
       therapy.stop();
       state = "drive";
     }
-    if (x >= -605 && x <= -566 && y <= 130 && keys[4] && wait >= 10) {
+    if (destx >= -347 && desty <= 296 && desty >= 194 && keys[3] && state == "walk" && story == 9) {
+      songtimer = 0;
+      drivetimer = 0;
+      therapy.stop();
+      state = "drive";
+    }
+    if (destx >= -605 && destx <= -566 && desty <= 130 && keys[4] && wait >= 10) {
       textnum = 1;
       state = "talk";
     }
-    if (x >= -488 && x <= -392 && y <= 61 && keys[4] && wait >= 10) {
+    if (destx >= -488 && destx <= -392 && desty <= 62 && keys[4] && wait >= 10) {
       textnum = 0;
       state = "talk";
     }
-    if (y == 182 && x <= -539 && x >= -626 && story == 2 && keys[1]) {
+    if (desty == 182 && destx <= -539 && destx >= -626 && story == 2 && keys[1]) {
       destx = x;
       desty = y;
       therapy.stop();
       songtimer = 0;
+      bstory = 0;
       state = "battle";
     }
-    if (y >= 182 && x <= -539 && x >= -626 && story == 8 && keys[1]) {
+    if (desty >= 179 && destx <= -539 && destx >= -626 && story == 8 && keys[1]) {
       lcambound = camx;
       rcambound = camx;
       ucambound = camy;
       dcambound = camy;
       therapy.stop();
       songtimer = 0;
+      bstory = 0;
       state = "battle";
     }
     if (keys[0] && state == "walk") {
-      if (y <= ubound || y <= 272 && y >= 185 && x <= -488 && x >= -692 || y <= 128 && x >= -635 && x <= -539) {
-        y+=0;
+      if (desty <= ubound || desty <= 272 && desty >= 185 && destx <= -488 && destx >= -692 || desty <= 128 && destx >= -635 && destx <= -539) {
+        desty+=0;
+        frisk[0] = loadImage("su.png");
       } else {
-        y -= 3;
+        desty -= 3;
       }
     }
     if (keys[1] && state == "walk") {
-      if (y >= dbound || y >=182 && x <= -488 && x >= -692 && y <= 269) {
-        y+=0;
+      if (desty >= dbound || desty >=182 && destx <= -488 && destx >= -692 && desty <= 269) {
+        desty+=0;
+        frisk[0] = loadImage("sd.png");
       } else {
-        y += 3;
+        desty += 3;
       }
     }
     if (keys[2] && state == "walk") {
-      if (x <= lbound || y >= 185 && y <= 269 && x <= -485 && x >= -692 || y <= 125 && x >= -635 && x <= -536) {
-        x +=0;
+      if (destx <= lbound || desty >= 185 && desty <= 269 && destx <= -485 && destx >= -692 || desty <= 125 && destx >= -635 && destx <= -536) {
+        destx +=0;
+        frisk[0] = loadImage("sl.png");
       } else {
-        x -= 3;
+        destx -= 3;
       }
     }
     if (keys[3] && state == "walk") {
-      if (x >= rbound || y >=185 && y <= 269 && x <= -494 && x >= -695 || y <= 125 && x >= -638 && x <= -539) {
-        x+=0;
+      if (destx >= rbound || desty >=185 && desty <= 269 && destx <= -494 && destx >= -695 || desty <= 125 && destx >= -638 && destx <= -539) {
+        destx+=0;
+        frisk[0] = loadImage("sr.png");
       } else {
-        x += 3;
+        destx += 3;
       }
     }
   }
@@ -234,7 +297,10 @@ void draw() {
     if (wait < 10) {
       wait += 1;
     }
-    if (x >= 961 && y <= 77 || x >= 959 && y <= 80) {
+    if (wait > 10) {
+      wait = 0;
+    }
+    if (destx >= 961 && desty <= 77 || destx >= 959 && desty <= 80) {
       if (keys[4] && state == "walk" && story == 5 && wait >= 10) {
         songtimer = 0;
         state = "sleep";
@@ -253,41 +319,54 @@ void draw() {
         songtimer = 0;
         state = "sleep";
       }
+      if (keys[4] && state == "walk" && story == 9 && wait >= 10) {
+        counter = 0;
+        bybed = true;
+        state = "talk";
+      }  
+      if (keys[4] && state == "walk" && story == 10 && wait >= 10) {
+        songtimer = 0;
+        state = "sleep";
+      }
     }
-    if (y <= 29 && x >= 880 && x <= 928 && keys[4] && state == "walk" && wait >= 10) {
+    if (desty <= 29 && destx >= 880 && destx <= 928 && keys[4] && state == "walk" && wait >= 10) {
       bybed = false;
       counter = 0;
       state = "talk";
     }
     if (keys[0] && state == "walk") {
-      if (y <= ubound || x >= 959 && y <= 80) {
-        y+=0;
+      if (desty <= ubound || destx >= 959 && desty <= 80) {
+        desty+=0;
+        frisk[0] = loadImage("su.png");
       } else {
-        y -= 3;
+        desty -= 3;
       }
     }
     if (keys[1] && state == "walk") {
-      if (y >= dbound && x >= 856 || y >= dbound && x <= 820) {
-        y+=0;
+      if (desty >= dbound && destx >= 856 || desty >= dbound && destx <= 820) {
+        desty+=0;
+        frisk[0] = loadImage("sd.png");
       } else {
-        y += 3;
+        desty += 3;
       }
     }
     if (keys[2] && state == "walk") {
-      if (x <= lbound || x <= 817 && y >= 194) {
-        x +=0;
+      if (destx <= lbound || destx <= 817 && desty >= 194) {
+        destx +=0;
+        frisk[0] = loadImage("sl.png");
       } else {
-        x -= 3;
+        destx -= 3;
       }
     }
     if (keys[3] && state == "walk") {
-      if (x >= rbound || x >= 862 && y >= 194 || x >= 961 && y <= 77) {
-        x+=0;
+      if (destx >= rbound || destx >= 862 && desty >= 194 || destx >= 961 && desty <= 77) {
+        destx+=0;
+        frisk[0] = loadImage("sr.png");
       } else {
-        x += 3;
+        destx += 3;
       }
     }
-    if (y >= 248 && keys[1]) {
+    if (desty >= 248 && keys[1]) {
       room = "hall";
     }
   }
@@ -308,50 +387,54 @@ void draw() {
     rbound = 1090;
     ubound = 220;
     dbound = 300;
-    if (x <= -320 && story == 6) {
+    if (destx <= -320 && story == 6) {
       drivetimer = 0;
       state = "drive";
     }
-    if (x <= -320 && story == 8 && keys[2]) {
+    if (destx <= -320 && story == 8 && keys[2]) {
       songtimer = 0;
       drivetimer = 0;
       state = "drive";
     }
-    if (x >= -20 && x <= 25 && y <= 220 && keys[0] && state == "walk") {
+    if (destx >= -20 && destx <= 25 && desty <= 220 && keys[0] && state == "walk") {
       room = "kitchen";
     }
-    if (x >= 394 && x <= 448 && y <= 220 && keys[0] && state == "walk") {
+    if (destx >= 394 && destx <= 448 && desty <= 220 && keys[0] && state == "walk") {
       room = "blue";
     }
-    if (x >= 817 && x <= 865 && y <= 220 && keys[0]) {
+    if (destx >= 817 && destx <= 865 && desty <= 220 && keys[0]) {
       room = "bedroom";
     }
     if (keys[0] && state == "walk") {
-      if (y <= ubound) {
-        y+=0;
+      if (desty <= ubound) {
+        desty+=0;
+        frisk[0] = loadImage("su.png");
       } else {
-        y -= 3;
+        desty -= 3;
       }
     }
     if (keys[1] && state == "walk") {
-      if (y >= dbound) {
-        y+=0;
+      if (desty >= dbound) {
+        desty+=0;
+        frisk[0] = loadImage("sd.png");
       } else {
-        y += 3;
+        desty += 3;
       }
     }
     if (keys[2] && state == "walk") {
-      if (x <= lbound) {
-        x +=0;
+      if (destx <= lbound) {
+        destx +=0;
+        frisk[0] = loadImage("sl.png");
       } else {
-        x -= 3;
+        destx -= 3;
       }
     }
     if (keys[3] && state == "walk") {
-      if (x >= rbound) {
-        x+=0;
+      if (destx >= rbound) {
+        destx+=0;
+        frisk[0] = loadImage("sr.png");
       } else {
-        x += 3;
+        destx += 3;
       }
     }
   }
@@ -362,6 +445,9 @@ void draw() {
     songtimer += 1;
     if (wait < 10) {
       wait += 1;
+    }
+    if (wait > 10) {
+      wait = 0;
     }
     if (songtimer >= 123*60) {
       songtimer = 0;
@@ -375,43 +461,47 @@ void draw() {
     rcambound = 500;
     ucambound = 59;
     dcambound = 59;
-    if (x <= 393 && y <=164 && keys[4] && wait >= 10 && state == "walk") {
+    if (destx <= 393 && desty <=164 && keys[4] && wait >= 10 && state == "walk") {
       bybed = true;
       state = "talk";
     }
-    if (x <= 564 && x >= 462 && y <=-31 && keys[4] && wait >= 10 && state == "walk") {
+    if (destx <= 564 && destx >= 462 && desty <=-31 && keys[4] && wait >= 10 && state == "walk") {
       bybed = false;
       state = "talk";
     }
-    if (y >= 190 && x >= 406 && x <= 440 && keys[1] && state == "walk") {
+    if (desty >= 190 && destx >= 406 && destx <= 440 && keys[1] && state == "walk") {
       room = "hall";
     }
     if (keys[0] && state == "walk") {
-      if (y <= ubound || y <= 135 && x <= 430) {
-        y+=0;
+      if (desty <= ubound || desty <= 135 && destx <= 430) {
+        desty+=0;
+        frisk[0] = loadImage("su.png");
       } else {
-        y -= 3;
+        desty -= 3;
       }
     }
     if (keys[1] && state == "walk") {
-      if (y >= dbound || y >=95 && x >= 592) {
-        y+=0;
+      if (desty >= dbound || desty >=95 && destx >= 592) {
+        desty+=0;
+        frisk[0] = loadImage("sd.png");
       } else {
-        y += 3;
+        desty += 3;
       }
     }
     if (keys[2] && state == "walk") {
-      if (x <= lbound || x <= 433 && y <= 132) {
-        x +=0;
+      if (destx <= lbound || destx <= 433 && y <= 132) {
+        destx +=0;
+        frisk[0] = loadImage("sl.png");
       } else {
-        x -= 3;
+        destx -= 3;
       }
     }
     if (keys[3] && state == "walk") {
-      if (x >= rbound || x >= 589 && y >=98) {
-        x+=0;
+      if (destx >= rbound || destx >= 589 && y >=98) {
+        destx+=0;
+        frisk[0] = loadImage("sr.png");
       } else {
-        x += 3;
+        destx += 3;
       }
     }
   }
@@ -451,61 +541,67 @@ void draw() {
     rcambound = 97;
     ucambound = 59;
     dcambound = 59;
-    if (y >= 173 && x >= -26 && x <= 37 && keys[1] && state == "walk") {
-      y = 212;
+    if (desty >= 173 && destx >= -26 && destx <= 37 && keys[1] && state == "walk") {
+      desty = 212;
       room = "hall";
     }
-    if (y <= 32 && x <= -29 && keys[4] && state == "walk" && wait >= 10) {
+    if (desty <= 32 && destx <= -29 && keys[4] && state == "walk" && wait >= 10) {
       textnum = 0;
       if (story == 7) {
         gotyog = true;
       }
       state = "talk";
     }
-    if (y <= 32 && x <= 37 && x >= 7 && keys[4] && state == "walk" && wait >= 10) {
+    if (desty <= 32 && destx <= 37 && destx >= 7 && keys[4] && state == "walk" && wait >= 10) {
       textnum = 1;
       state = "talk";
     }
-    if (y <= 32 && x <= 187 && x >= 82 && keys[4] && state == "walk" && wait >= 10) {
+    if (desty <= 32 && destx <= 187 && destx >= 82 && keys[4] && state == "walk" && wait >= 10) {
       textnum = 2;
       state = "talk";
     }
-    if (y <= 32 && x <= 256 && x >= 217 && keys[4] && state == "walk" && wait >= 10) {
+    if (desty <= 32 && destx <= 256 && destx >= 217 && keys[4] && state == "walk" && wait >= 10) {
       textnum = 3;
       state = "talk";
     }
     if (keys[0] && state == "walk") {
       if (y <= ubound) {
-        y+=0;
+        desty+=0;
+        frisk[0] = loadImage("su.png");
       } else {
-        y -= 3;
+        desty -= 3;
       }
     }
     if (keys[1] && state == "walk") {
       if (y >= dbound) {
-        y+=0;
+        desty+=0;
+        frisk[0] = loadImage("sd.png");
       } else {
-        y += 3;
+        desty += 3;
       }
     }
     if (keys[2] && state == "walk") {
       if (x <= lbound) {
-        x +=0;
+        destx +=0;
+        frisk[0] = loadImage("sl.png");
       } else {
-        x -= 3;
+        destx -= 3;
       }
     }
     if (keys[3] && state == "walk") {
       if (x >= rbound) {
-        x+=0;
+        destx+=0;
+        frisk[0] = loadImage("sr.png");
       } else {
-        x += 3;
+        destx += 3;
       }
     }
   }
   camera(camx, camy, (height/2) / tan(PI/6), camx, camy, 0, 0, 1, 0);
   if (state == "walk") {
-    if (keys[1] && keys[2] == false && keys[3] == false && keys[0] == false) {
+    y = lerp(y, desty, .9);
+    x = lerp(x, destx, .9);
+    if (desty > y && destx == x) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("w1d.png");
@@ -523,7 +619,7 @@ void draw() {
         walktimer = 0;
       }
     }
-    if (keys[0] && keys[1] == false && keys[2] == false && keys[3] == false) {
+    if (desty < y && destx == x) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("w1u.png");
@@ -541,7 +637,7 @@ void draw() {
         walktimer = 0;
       }
     }
-    if (keys[3] && keys[0] == false && keys[1] == false && keys[2] == false) {
+    if (destx > x && desty == y) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("wr.png");
@@ -553,7 +649,7 @@ void draw() {
         walktimer = 0;
       }
     }
-    if (keys[3] && keys[0] || keys[3] && keys[1]) {
+    if (destx > x && desty > y || destx > x && desty < y) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("wr.png");
@@ -565,7 +661,7 @@ void draw() {
         walktimer = 0;
       }
     }
-    if (keys[2] && keys[0] == false && keys[1] == false && keys[3] == false) {
+    if (destx < x && desty == y) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("wl.png");
@@ -577,19 +673,7 @@ void draw() {
         walktimer = 0;
       }
     }
-    if (keys[2] && keys[1]) {
-      walktimer += 1;
-      if (walktimer <= 9) {
-        frisk[0] = loadImage("wl.png");
-      }
-      if (walktimer >= 10 && walktimer <= 19) {
-        frisk[0] = loadImage("sl.png");
-      }
-      if (walktimer == 20) {
-        walktimer = 0;
-      }
-    }
-    if (keys[2] && keys[0]) {
+    if (destx < x && desty > y || destx < x && desty < y) {
       walktimer += 1;
       if (walktimer <= 9) {
         frisk[0] = loadImage("wl.png");
@@ -607,6 +691,10 @@ void draw() {
     dcambound = camy;
     rcambound = camx;
     lcambound = camx;
+    rbound = x;
+    lbound = x;
+    ubound = y;
+    dbound = y;
     x = lerp(x, destx, .15);
     y = lerp(y, desty, .15);
     xsize = 28.5;
@@ -672,6 +760,9 @@ void draw() {
         if (wait < 10) {
           wait += 1;
         }
+        if (wait >10) {
+          wait = 0;
+        }
         if (bstory == 0) {
           btltext[0] = "Therapist Frank asks you how you're doing with your anger.";
         }
@@ -712,6 +803,9 @@ void draw() {
       if (bstate == "act") {
         if (wait < 10) {
           wait += 1;
+        }
+        if (wait > 10) {
+          wait = 0;
         }
         textSize(30);
         if (actstate == 0) {
@@ -848,7 +942,7 @@ void draw() {
         y = 1000;
         textSize(30);
         if (keys[5]) {
-          counter = btltext[0].length()*3;
+          counter = btltext[0].length()*2;
         }
         if (counter < btltext[0].length()*2) {
           counter++;
@@ -862,8 +956,10 @@ void draw() {
             counter = 0;
             btl1song.stop();
             songtimer = 0;
-            x = camx;
-            y = camy - 10;
+            destx = camx;
+            desty = camy - 10;
+            x = destx;
+            y = desty;
             frisknum = 0;
             xsize = 38;
             ysize = 62;
@@ -1080,6 +1176,9 @@ void draw() {
         if (keyCode == DOWN && actstate == 1 && bstory != 1 && bstory != 2) {
           actstate = 3;
         }
+        if (keyCode == DOWN && actstate == 1 && bstory == 1 || keyCode == DOWN && actstate == 1 && bstory == 2) {
+          actstate = 2;
+        }
         if (keyCode == UP && actstate == 2) {
           actstate = 0;
         }
@@ -1192,8 +1291,8 @@ void draw() {
             ysize = 62;
             frisk[0] = loadImage("sr.png");
             state = "drive";
-            y = camy;
-            x = -320;
+            desty = camy;
+            destx = -320;
             story = 7;
           }
           if (bstory == 2) {
@@ -1377,7 +1476,7 @@ void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 3) {
-          btltext[0] = "You don't say anything, but eventually get up and leave.";
+          btltext[0] = "You don't say anything, but soon get up and leave.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -1499,7 +1598,7 @@ void draw() {
         counter++;
         sanssound.play(1, .015);
       }
-      text(text1.substring(0, counter/3), camx -180, camy + 115, 300, 75);
+      text(text1.substring(0, counter/3), camx -180, camy + 115, 300, 200);
       if (counter/3 == text1.length()) {
         if (keys[4]) {
           state = "walk";
@@ -1535,6 +1634,56 @@ void draw() {
         if (keys[4]) {
           wait = 0;
           counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 9 && bybed == true && room == "bedroom") {
+      fill(255);
+      text1 = "You're too worked up to go to bed.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 9 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "You play some Mario to relieve stress.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          story = 10;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 10 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "Now you should go to bed.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          story = 10;
           state = "walk";
         }
       }
@@ -1699,6 +1848,38 @@ void draw() {
         }
       }
     }
+    if (story == 11 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "Even though you don't want to, you should go to school.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 11 && bybed == true && room == "bedroom") {
+      fill(255);
+      text1 = "Even though you don't want to, you should go to school.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
     if (story == 7 && room == "bedroom" && gotyog == false) {
       fill(255);
       text1 = "Your stomach starts to gurgle.";
@@ -1812,6 +1993,22 @@ void draw() {
         }
       }
     }
+    if (story == 9 && textnum == 1 && room == "r1") {
+      fill(255);
+      text1 = ".........................................................";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
     if (textnum == 0 && room == "r1" && story > 1) {
       fill(255);
       text1 = "There's a bunch of psychiatric encyclopedias.";
@@ -1851,8 +2048,10 @@ void draw() {
       if (story == 7) {
         songtimer = 0;
         room = "hall";
-        x = -320;
-        y = 259;
+        destx = -320;
+        desty = 259;
+        x = destx;
+        y = desty;
         lcambound = 0;
         rcambound = 850;
         ucambound = height/2;
@@ -1865,6 +2064,10 @@ void draw() {
       }
       if (story == 8) {
         room = "r1";
+        state = "walk";
+      }
+      if (story == 9) {
+        room = "hall";
         state = "walk";
       }
     }
@@ -1887,6 +2090,9 @@ void draw() {
     }
     if (story == 7) {
       story = 8;
+    }
+    if (story == 10) {
+      story = 11;
     }
   }
 }
