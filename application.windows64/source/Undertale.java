@@ -44,7 +44,7 @@ String[] btltext = new String[20];
 boolean[] keys = new boolean[6];
 boolean bybed = false;
 boolean mean, gotyog;
-SoundFile sanssound, therapy, btl1song, car, home, sleep, attack, chill, megalovania, date, girltext;
+SoundFile sanssound, therapy, btl1song, car, home, sleep, attack, chill, megalovania, date, girltext, rain, gun, credits;
 public void setup() {
   songtimer = 0;
   textnum = 0;
@@ -58,6 +58,9 @@ public void setup() {
   chill = new SoundFile(this, "Undertale OST_ 041 - Chill.mp3");
   megalovania = new SoundFile(this, "Undertale OST_ 100 - Megalovania.mp3");
   date = new SoundFile(this, "Undertale OST_ 025 - Dating Start!.mp3");
+  rain = new SoundFile(this, "Undertale OST_ 063 - It's Raining Somewhere Else.mp3");
+  gun = new SoundFile(this, "45 ACP sound effect.mp3");
+  credits = new SoundFile(this, "Undertale OST_ 031 - Waterfall 2.mp3");
   girltext = new SoundFile(this, "Toriel voice.wav");
   font = loadFont("DeterminationMono-48.vlw");
   textFont(font, 20);
@@ -175,7 +178,8 @@ public void draw() {
       megalovania.play(1, 0.1f);
     }
     songtimer += 1;
-    if (songtimer == megalovania.duration()*60) {
+    if (songtimer == 9360) {
+      megalovania.stop();
       songtimer = 0;
     }
     if (keys[4]) {
@@ -360,6 +364,11 @@ public void draw() {
         bybed = true;
         state = "talk";
       }
+      if (keys[4] && state == "walk" && story >= 14 && wait >= 10) {
+        counter = 0;
+        bybed = true;
+        state = "talk";
+      }
     }
     if (desty <= 29 && destx >= 880 && destx <= 928 && keys[4] && state == "walk" && wait >= 10) {
       bybed = false;
@@ -434,6 +443,11 @@ public void draw() {
       state = "drive";
     }
     if (destx <= -320 && story == 13 && keys[2]) {
+      songtimer = 0;
+      drivetimer = 0;
+      state = "drive";
+    }
+    if (destx <= -320 && story == 15 && keys[2]) {
       songtimer = 0;
       drivetimer = 0;
       state = "drive";
@@ -1294,6 +1308,7 @@ public void draw() {
           btltext[0] = "You make an angry face at Marcus.";
           counter = 0;
           wait = 0;
+          actstate = 0;
           bstate = "talk";
         }
         if (keys[4] && wait == 10 && bstory == 3) {
@@ -1647,7 +1662,7 @@ public void draw() {
       if (bstory == 2) {
         acts[0] = "Lie";
         acts[1] = "Explain";
-        acts[2] = "Say ''Yeah''";
+        acts[2] = "Say \"Yeah\"";
       }
       if (bstory == 3) {
         acts[0] = "Oh";
@@ -1742,7 +1757,7 @@ public void draw() {
           actstate = 0;
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 0) {
-          btltext[0] = "You shout, ''HI!'' aross the hallway.";
+          btltext[0] = "You shout, \"HI!\" aross the hallway.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -1760,7 +1775,7 @@ public void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 3) {
-          btltext[0] = "You manage to get out an ''Oh'' before she leaves.";
+          btltext[0] = "You manage to get out an \"Oh\" before she leaves.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -1805,7 +1820,7 @@ public void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 2 && wait == 10 && bstory == 2) {
-          btltext[0] = "You just say ''Yeah.''";
+          btltext[0] = "You just say \"Yeah.\"";
           counter = 0;
           wait = 0;
           silencecount+=1;
@@ -1893,12 +1908,18 @@ public void draw() {
         acts[3] = "Scowl";
       }
       if (bstory == 1) {
-        acts[0] = "Mock him";
+        acts[0] = "Lie";
         acts[1] = "Stay silent";
         acts[2] = "Run away";
-        acts[3] = "";
+        acts[3] = "Call out";
       }
-        if (bstory == 2) {
+      if (bstory == 2) {
+        acts[0] = "Shout back";
+        acts[1] = "Silence";
+        acts[2] = "Run away";
+        acts[3] = "Call out";
+      }
+      if (bstory == 3) {
         acts[0] = "Run away";
         acts[1] = "Run away";
         acts[2] = "Run away";
@@ -1933,7 +1954,7 @@ public void draw() {
           btltext[0] = "So, I heard you lost your girlfriend.";
         }
         if (bstory == 2 && silencecount == 0) {
-          btltext[0] = "People start crowding the two of you.";
+          btltext[0] = "Random people start shouting mean things at you.";
         }
         if (bstory == 3 && silencecount == 0) {
           if (mean == true) {
@@ -2016,17 +2037,15 @@ public void draw() {
             xsize = 38;
             ysize = 62;
             frisk[0] = loadImage("sr.png");
+            story = 14;
             state = "drive";
-            story = 7;
           }
           if (bstory < 3) {
             bstory += 1;
-          }
-          if (bstory == 2) {
             mean = true;
           }
         }
-        x = 7000;
+        x = 700000;
       }
       if (bstate == "act") {
         if (wait < 10) {
@@ -2075,16 +2094,13 @@ public void draw() {
         if (keyCode == LEFT && actstate == 1) {
           actstate = 0;
         }
-        if (keyCode == DOWN && actstate == 1 && bstory != 1 && bstory != 2) {
+        if (keyCode == DOWN && actstate == 1) {
           actstate = 3;
-        }
-        if (keyCode == DOWN && actstate == 1 && bstory == 1 || keyCode == DOWN && actstate == 1 && bstory == 2) {
-          actstate = 2;
         }
         if (keyCode == UP && actstate == 2) {
           actstate = 0;
         }
-        if (keyCode == RIGHT && actstate == 2 && bstory != 1 && bstory != 2) {
+        if (keyCode == RIGHT && actstate == 2) {
           actstate = 3;
         }
         if (keyCode == UP && actstate == 3) {
@@ -2100,13 +2116,13 @@ public void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 1) {
-          btltext[0] = "You start to make fun of random things about him.";
+          btltext[0] = "You tell him she didn't leave you.";
           counter = 0;
           wait = 0;
           bstate = "talk";
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 2) {
-          btltext[0] = "You make fun of what he's wearing at the moment.";
+          btltext[0] = "You shout things at the people around you.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -2118,13 +2134,13 @@ public void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 1 && wait == 10 && bstory == 1) {
-          btltext[0] = "You cower towards the lockers.";
+          btltext[0] = "You look toward the ground.";
           counter = 0;
           wait = 0;
           bstate = "talk";
         }
         if (keys[4] && actstate == 1 && wait == 10 && bstory == 2) {
-          btltext[0] = "You hang your head down.";
+          btltext[0] = "You hang your head down and tear up a little.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -2152,6 +2168,18 @@ public void draw() {
         }
         if (keys[4] && actstate == 3 && wait == 10 && bstory == 0) {
           btltext[0] = "You make a nasty face.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 3 && wait == 10 && bstory == 1) {
+          btltext[0] = "You call out, but it only draws people in.";
+          counter = 0;
+          wait = 0;
+          bstate = "talk";
+        }
+        if (keys[4] && actstate == 3 && wait == 10 && bstory == 2) {
+          btltext[0] = "You call for help, but no one comes.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -2195,7 +2223,7 @@ public void draw() {
             state = "drive";
             desty = camy;
             destx = -320;
-            story = 7;
+            story = 14;
           }
           if (bstory == 2) {
             wait = 0;
@@ -2214,13 +2242,70 @@ public void draw() {
         }
       }
     }
+    if (story == 15) {
+      mainstate = "fights";
+      if (songtimer == 0 && bstate == "main") {
+        rain.play(.85f, .02f);
+      }
+      songtimer += 1;
+      if (songtimer >= 170*60 && bstate == "main") {
+        rain.stop();
+        songtimer = 0;
+      }
+      imageMode(CENTER);
+      pushMatrix();
+      translate(camx, camy - 170);
+      image(papyrus, 0, 45, 74*2, 103*2);
+      popMatrix();
+      imageMode(CORNER);
+      if (bstate == "main") {
+        if (wait < 10) {
+          wait += 1;
+        }
+        if (bstory == 0) {
+          btltext[0] = "You can't deal with it any more.";
+        }
+        imageMode(CENTER);
+        image(acticon[1], camx, camy + 200);
+        imageMode(CORNER);
+        textSize(30);
+        if (counter < btltext[0].length()*2) {
+          counter++;
+          sanssound.play(1, .015f);
+        }
+        text(btltext[0].substring(0, counter/2), camx -180, camy + 20, 400, 200);
+        if (mainstate == "fights") {
+          acticon[1] = loadImage("fights.png");
+          destx = camx - 53;
+          desty = camy + 178;
+        }
+        if (keys[4] && wait == 10 && mainstate == "fights") {
+          wait = 0;
+          fighttimer = 0;
+          bstate = "fight";
+        }
+      }
+      if (bstate == "fight") {
+        rain.stop();
+        background(0);
+        frisk[frisknum] = loadImage("blank.png");
+        destx = camx;
+        desty = camy + 300;
+        if (fighttimer == 0) {
+          gun.play(1, .15f);
+        }
+        fighttimer += 1;
+        if (fighttimer == 7*60) {
+          songtimer = 0;
+          state = "credits";
+        }
+      }
+    }
   }
   pushMatrix();
   translate(x, y);
   image(frisk[frisknum], 0, 0, xsize, ysize);
   popMatrix();
-  text(x, x, y - 5);
-  text(y, x, y - 25);
   textSize(30);
   fill(255);
   if (state == "talk") {
@@ -2571,6 +2656,71 @@ public void draw() {
         }
       }
     }
+    if (story == 14 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "You can't play games right now. You need to show them.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015f);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 15 && bybed == false && room == "bedroom") {
+      fill(255);
+      text1 = "Your heart crusts over in anger.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015f);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
+    if (story == 14 && bybed == true && room == "bedroom") {
+      fill(255);
+      text1 = "You grab the pistol you've been keeping under your bed.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015f);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          songtimer = 0;
+          state = "sleep";
+        }
+      }
+    }
+    if (story == 15 && bybed == true && room == "bedroom") {
+      fill(255);
+      text1 = "Your eyes fill with rage.";
+      if (counter < text1.length()*3) {
+        counter++;
+        sanssound.play(1, .015f);
+      }
+      text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
+      if (counter/3 == text1.length()) {
+        if (keys[4]) {
+          wait = 0;
+          counter = 0;
+          state = "walk";
+        }
+      }
+    }
     if (story == 7 && room == "bedroom" && gotyog == false) {
       fill(255);
       text1 = "Your stomach starts to gurgle.";
@@ -2728,7 +2878,7 @@ public void draw() {
       car.play(1, .015f);
     }
     drivetimer += 1;
-    if (drivetimer == (60*5) + 20 || keys[4] && wait >= 10) {
+    if (drivetimer == (60*5) + 20 || keys[5] && wait >= 10) {
       car.stop();
       if (story == 3) {
         room = "hall";
@@ -2791,6 +2941,28 @@ public void draw() {
         bstory = 0;
         state = "battle";
       }
+      if (story == 14) {
+        songtimer = 0;
+        room = "hall";
+        destx = -320;
+        desty = 259;
+        x = destx;
+        y = desty;
+        lcambound = 0;
+        rcambound = 850;
+        ucambound = height/2;
+        dcambound = height/2;
+        lbound = -320;
+        rbound = 1090;
+        ubound = 220;
+        dbound = 300;        
+        state = "walk";
+      }
+      if (story == 15) {
+        songtimer = 0;
+        bstory = 0;
+        state = "battle";
+      }
     }
   }
   if (state == "sleep") {
@@ -2818,6 +2990,44 @@ public void draw() {
     if (story == 12) {
       story = 13;
     }
+    if (story == 14) {
+      story = 15;
+    }
+  }
+  if (state == "credits") {
+    if (songtimer == 0) {
+      credits.play(1, 0.15f);
+    }
+    songtimer += 1 ;
+    frisk[frisknum] = loadImage("blank.png");
+    if (songtimer < 55*60) {
+      y -= 1;
+    }
+    fill(255);
+    rectMode(CENTER);
+    textAlign(CENTER);
+    textSize(20);
+    text("CREDITS\n\nNolan Manor                   Producer\nNolan Manor                Co-Producer\nNolan Manor                   Director\nNolan Manor            Lead Programmer\nNicole Merner         Nothing Actually", x, y + 300, 480, 500);
+    text("WORKS CITED", x, y + 500, 480, 200);
+    fill(255, 255, 0);
+    text("Sorry, the indentations are wrong, but I can't do anything about that, so I've printed out a copy.", x, y + 550, 480, 200);
+    fill(255);
+    text("Car Engine Sound Effect. Dir. FX Sounds. YouTube. YouTube, 4 Jan. 2014. Web. 14 May 2016. <https://www.youtube.com/watch?v=f5Z13dTcmro>.", x, y + 750, 460, 300);
+    text("Ccooldean. Papyrus and Sans's House. Digital image. The Spriters Resource. N.p., n.d. Web. 18 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/77169/>.", x, y + 750 + 150, 460, 300);
+    text("Esteban64ds. Home and New Home. Digital image. The Spriters Resource. N.p., n.d. Web. 4 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/76337/>.", x, y + 900 + 150, 460, 300);
+    text("Fox, Toby. UNDERTALE Soundtrack. Perf. Stephanie MacIntire. Toby Fox. BandCamp, 2015. MP3.", x, y + 1050 + 150, 460, 300);
+    text("Fillerthefreak. Battle Icons. Digital image. The Spriters Resource. N.p., n.d. Web. 10 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/76661/>.", x, y + 1150 + 150, 460, 300);
+    text("The Herp Derpinator. Attack Effects. Digital image. The Spriters Resource. N.p., n.d. Web. 19 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/77983/>.", x, y + 1300 + 150, 460, 300);
+    text("The Herp Derpinator. Muffet. Digital image. The Spriters Resource. N.p., n.d. Web. 23 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/77091/>.", x, y + 1450 + 150, 460, 300);
+    text("UnderFail. Frisk. Digital image. The Spriters Resource. N.p., n.d. Web. 10 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/75941/>.", x, y + 1600 + 150, 460, 300);
+    text("UnderFail. Papyrus. Digital image. The Spriters Resource. N.p., n.d. Web. 19 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/76014/>.", x, y + 1750 + 150, 460, 300);
+    text("UnderFail. Sans. Digital image. The Spriters Resource. N.p., n.d. Web. 14 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/76011/>.", x, y + 1900 + 150, 460, 300);
+    text("UnderFail. Sans. Digital image. The Spriters Resource. N.p., n.d. Web. 14 May 2016. <http://www.spriters-resource.com/pc_computer/undertale/sheet/76017/>.", x, y + 2050 + 150, 460, 300);
+    text("\"Undertale Sounds.\" MediaFire. N.p., 17 Oct. 2015. Web. 12 May 2016. <http://www.mediafire.com/download/56ckqkl9csddame/undertale+sounds.zip>.", x, y + 2200 + 150, 460, 300);
+    text("Wakamatsu, Harry. DTM-Mono. N.p.: n.p., 16 Nov. 2015. OTF.", x, y + 2350 + 150, 460, 300);
+    text(".45 ACP Sound Effect. Dir. Jojikiba. YouTube. YouTube, 13 June 2012. Web. 25 May 2016. <https://www.youtube.com/watch?v=2MWza2mpzVc>.", x, y + 2650, 460, 300);
+    fill(255, 0, 0);
+    text("What have you done?", x, y + 3150, 460, 300);
   }
 }
   public void settings() {  size(640, 480, P3D); }
