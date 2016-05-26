@@ -59,7 +59,7 @@ public void setup() {
   megalovania = new SoundFile(this, "Undertale OST_ 100 - Megalovania.mp3");
   date = new SoundFile(this, "Undertale OST_ 025 - Dating Start!.mp3");
   rain = new SoundFile(this, "Undertale OST_ 063 - It's Raining Somewhere Else.mp3");
-  gun = new SoundFile(this, "45 ACP sound effect.mp3");
+  gun = new SoundFile(this, "45 ACP sound effect.wav");
   credits = new SoundFile(this, "Undertale OST_ 031 - Waterfall 2.mp3");
   girltext = new SoundFile(this, "Toriel voice.wav");
   font = loadFont("DeterminationMono-48.vlw");
@@ -1328,7 +1328,7 @@ public void draw() {
         y = 1000;
         textSize(30);
         if (keys[5]) {
-          counter = btltext[0].length()*3;
+          counter = btltext[0].length()*2;
         }
         if (counter < btltext[0].length()*2) {
           counter++;
@@ -2201,7 +2201,7 @@ public void draw() {
         y = 1000;
         textSize(30);
         if (keys[5]) {
-          counter = btltext[0].length()*3;
+          counter = btltext[0].length()*2;
         }
         if (counter < btltext[0].length()*2) {
           counter++;
@@ -2514,7 +2514,7 @@ public void draw() {
     }
     if (bybed == false && room == "blue") {
       fill(255);
-      text1 = "It's a bunch of teenage romance novels.";
+      text1 = "There's a bunch of teenage romance novels.";
       if (counter < text1.length()*3) {
         counter++;
         sanssound.play(1, .015f);
