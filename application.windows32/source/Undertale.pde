@@ -145,12 +145,6 @@ void keyReleased() {
   if (key == 'x' || key == 'X') {
     keys[5] = false;
   }
-  if (key == '3') {
-    story += 1;
-  }
-  if (key == '1') {
-    room = "blue";
-  }
 }
 
 void draw() {
@@ -637,6 +631,9 @@ void draw() {
   }
   camera(camx, camy, (height/2) / tan(PI/6), camx, camy, 0, 0, 1, 0);
   if (state == "walk") {
+    explaincount = 0;
+    liecount = 0;
+    silencecount = 0;
     y = lerp(y, desty, .9);
     x = lerp(x, destx, .9);
     if (desty > y && destx == x) {
@@ -1739,7 +1736,7 @@ void draw() {
           actstate = 0;
         }
         if (keys[4] && actstate == 0 && wait == 10 && bstory == 0) {
-          btltext[0] = "You shout, \"HI!\" aross the hallway.";
+          btltext[0] = "You shout, \"HI!\" across the hallway.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -2116,7 +2113,7 @@ void draw() {
           bstate = "talk";
         }
         if (keys[4] && actstate == 1 && wait == 10 && bstory == 1) {
-          btltext[0] = "You look toward the ground.";
+          btltext[0] = "You look towards the ground.";
           counter = 0;
           wait = 0;
           bstate = "talk";
@@ -2416,7 +2413,7 @@ void draw() {
     }
     if (textnum == 0 && room == "kitchen") {
       fill(255);
-      text1 = "You grab a chocolate-flavored yogurt.";
+      text1 = "You grab a chocolate - flavored yogurt.";
       if (counter < text1.length()*3) {
         counter++;
         sanssound.play(1, .015);
@@ -2640,17 +2637,22 @@ void draw() {
     }
     if (story == 14 && bybed == false && room == "bedroom") {
       fill(255);
-      text1 = "You can't play games right now. You need to show them.";
+      if (explaincount == 0) {
+        text1 = "You can't play games right now.";
+      } else {
+        text1 = "You need to show them.";
+      }
       if (counter < text1.length()*3) {
         counter++;
         sanssound.play(1, .015);
       }
       text(text1.substring(0, counter/3), camx -180, camy + 105, 350, 200);
       if (counter/3 == text1.length()) {
-        if (keys[4]) {
-          wait = 0;
+        if (keys[4] && explaincount == 0) {
           counter = 0;
+        } else {
           state = "walk";
+          wait = 0;
         }
       }
     }
